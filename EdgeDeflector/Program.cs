@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Specialized;
 using System.Diagnostics;
+// for checking if the text file exists
+using System.IO;
 using System.Security.Principal;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -145,6 +147,30 @@ namespace EdgeDeflector
             Regex rgx = new Regex(msedge_protocol_pattern);
             string new_uri = rgx.Replace(uri, string.Empty);
 
+            // Only addition from me:
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory.ToString(), "ChangeUrl.txt");
+            if (File.Exists(path))
+            {
+                // Test
+                // System.Windows.Forms.MessageBox.Show("The file exists!");
+
+                // Open the stream and read it back.
+                string file_content = File.ReadAllText(path);
+
+                // Test
+                // System.Windows.Forms.MessageBox.Show("File was read: \"" + file_content + "\"");
+
+                string temp_uri = new_uri;
+                new_uri = new_uri.Replace("bing.com", file_content);
+
+                if (!IsHttpUri(new_uri))
+                {
+                    new_uri = temp_uri;
+                }
+                // test final check
+                // System.Windows.Forms.MessageBox.Show("New uri = " + new_uri);
+            }
+
             if (IsHttpUri(new_uri))
             {
                 return new_uri;
@@ -179,6 +205,8 @@ namespace EdgeDeflector
             Process.Start(launcher);
         }
 
+        // Satisfies rule: MarkWindowsFormsEntryPointsWithStaThread.
+        [STAThread]
         static void Main(string[] args)
         {
             // Assume argument is URI
