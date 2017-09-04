@@ -20,7 +20,13 @@ Thanks to the cool and great original EdgeDeflector program and their MIT licens
 
 A big thanks to [the cool authors](AUTHORS), I use the program since I discovered it!
 
+## How to install and use it?
+
+You can download the installer and my example text file that you need to place in the folder where the `.exe` file get's installed (`C:\Program Files (x86)\EdgeDeflector`) over here at: [Releases](https://github.com/AnonymerNiklasistanonym/EdgeDeflector/releases)
+
 ---
+
+*This is the original README.md*
 
 # EdgeDeflector
 
