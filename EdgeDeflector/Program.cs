@@ -2,6 +2,9 @@
 using System;
 using System.Collections.Specialized;
 using System.Diagnostics;
+// for checking if the text file exists
+using System.IO;
+using System.Net;
 using System.Security.Principal;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -57,7 +60,7 @@ namespace EdgeDeflector
             shellcmd_key.Close();
 
             uriclass_key.SetValue("URL Protocol", string.Empty);
-            
+
             uriclass_key.Close();
 
             RegistryKey software_key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Clients\EdgeUriDeflector", true);
@@ -71,7 +74,7 @@ namespace EdgeDeflector
             {
                 capability_key = software_key.CreateSubKey("Capabilities", true);
             }
-            
+
             capability_key.SetValue("ApplicationDescription", "Open web links normally forced to open in Microsoft Edge in your default web browser.");
             capability_key.SetValue("ApplicationName", "EdgeDeflector");
 
@@ -145,6 +148,49 @@ namespace EdgeDeflector
             Regex rgx = new Regex(msedge_protocol_pattern);
             string new_uri = rgx.Replace(uri, string.Empty);
 
+            // Only addition from me:
+            //var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory.ToString(), "ChangeUrl.txt");
+
+            string folder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string foldername = "EdgeDeflector";
+            string filename = "ChangeUrl.txt";
+
+            string path = Path.Combine(Path.Combine(folder, foldername), filename);
+
+
+            if (File.Exists(path))
+            {
+                // Test
+                // System.Windows.Forms.MessageBox.Show("The file exists!");
+                /*
+                var cli = new WebClient();
+                string data = cli.DownloadString(new_uri);*/
+
+                // Open the stream and read it back.
+                string file_content = File.ReadAllText(path);
+
+                string temp_uri = new_uri;
+
+                int search_query_start = new_uri.IndexOf('=') + 1;
+                int search_query_end = new_uri.IndexOf('&');
+
+                string search_query = new_uri.Substring(search_query_start, search_query_end - search_query_start);
+
+                new_uri = "https://" + file_content + search_query;
+
+                if (!IsHttpUri(new_uri))
+                {
+                    new_uri = temp_uri;
+                }
+
+                // Test
+                // System.Windows.Forms.MessageBox.Show("File was read: \"" + file_content + "\"");
+
+
+                // test final check
+                // System.Windows.Forms.MessageBox.Show("New uri = " + new_uri);
+            }
+
             if (IsHttpUri(new_uri))
             {
                 return new_uri;
@@ -179,6 +225,8 @@ namespace EdgeDeflector
             Process.Start(launcher);
         }
 
+        // Satisfies rule: MarkWindowsFormsEntryPointsWithStaThread.
+        [STAThread]
         static void Main(string[] args)
         {
             // Assume argument is URI
