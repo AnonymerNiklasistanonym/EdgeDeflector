@@ -171,12 +171,26 @@ namespace EdgeDeflector
 
                 string temp_uri = new_uri;
 
-                int search_query_start = new_uri.IndexOf('=') + 1;
-                int search_query_end = new_uri.IndexOf('&');
+                //System.Windows.Forms.MessageBox.Show("TempUri = " + temp_uri);
 
-                string search_query = new_uri.Substring(search_query_start, search_query_end - search_query_start);
+                //int search_query_start = new_uri.IndexOf('=') + 1;
+                //int search_query_end = new_uri.IndexOf('&');
 
-                new_uri = "https://" + file_content + search_query;
+                string search_query_start_identifier = "%3Fq%3D";
+                int search_query_start_new = new_uri.IndexOf(search_query_start_identifier);
+                int search_query_end_new = new_uri.IndexOf("%26form");
+
+                // string search_query = new_uri.Substring(search_query_start, search_query_end - search_query_start);
+
+                search_query_start_new = search_query_start_new + search_query_start_identifier.Length;
+                string search_query_new = new_uri.Substring(search_query_start_new, search_query_end_new - search_query_start_new);
+
+                
+                //new_uri = "https://" + file_content + Uri.HexEscape(search_query_new.ToCharArray()[0]);
+
+                new_uri = "https://" + file_content + search_query_new.Replace("%2B", "%20");
+
+               // System.Windows.Forms.MessageBox.Show("TempUri =\n" + temp_uri + "\nNew uri =\n" + new_uri + "\nNew uri =\n" + new_uri_2);
 
                 if (!IsHttpUri(new_uri))
                 {
