@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Security.Principal;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 
@@ -162,47 +163,47 @@ namespace EdgeDeflector
             {
                 // Test
                 // System.Windows.Forms.MessageBox.Show("The file exists!");
-                /*
-                var cli = new WebClient();
-                string data = cli.DownloadString(new_uri);*/
 
                 // Open the stream and read it back.
                 string file_content = File.ReadAllText(path);
 
+                // Test
+                // System.Windows.Forms.MessageBox.Show("File was read: \"" + file_content + "\"");
+
+                // save the current uri in a temp variable
                 string temp_uri = new_uri;
 
-                //System.Windows.Forms.MessageBox.Show("TempUri = " + temp_uri);
-
-                //int search_query_start = new_uri.IndexOf('=') + 1;
-                //int search_query_end = new_uri.IndexOf('&');
-
+                // extract the bing search query
                 string search_query_start_identifier = "%3Fq%3D";
                 int search_query_start_new = new_uri.IndexOf(search_query_start_identifier);
                 int search_query_end_new = new_uri.IndexOf("%26form");
-
-                // string search_query = new_uri.Substring(search_query_start, search_query_end - search_query_start);
-
                 search_query_start_new = search_query_start_new + search_query_start_identifier.Length;
                 string search_query_new = new_uri.Substring(search_query_start_new, search_query_end_new - search_query_start_new);
 
-                
-                //new_uri = "https://" + file_content + Uri.HexEscape(search_query_new.ToCharArray()[0]);
+                // now try to encode the query
+                try
+                {
+                    // encode bing query
+                    string encoded_query = HttpUtility.UrlDecode(search_query_new);
 
-                new_uri = "https://" + file_content + search_query_new.Replace("%2B", "%20");
+                    // set new uri
+                    new_uri = "https://" + file_content + encoded_query;
+                }
+                catch
+                {
+                    // reset uri
+                    new_uri = temp_uri;
+                }
 
-               // System.Windows.Forms.MessageBox.Show("TempUri =\n" + temp_uri + "\nNew uri =\n" + new_uri + "\nNew uri =\n" + new_uri_2);
+                // Debugging window:
+                // System.Windows.Forms.MessageBox.Show("TempUri =\n" + temp_uri + "\nNew uri =\n" + new_uri + "\nNew uri =\n" + new_uri);
 
+                // check if new uri is a real uri, else use the temp saved one
                 if (!IsHttpUri(new_uri))
                 {
                     new_uri = temp_uri;
                 }
 
-                // Test
-                // System.Windows.Forms.MessageBox.Show("File was read: \"" + file_content + "\"");
-
-
-                // test final check
-                // System.Windows.Forms.MessageBox.Show("New uri = " + new_uri);
             }
 
             if (IsHttpUri(new_uri))
